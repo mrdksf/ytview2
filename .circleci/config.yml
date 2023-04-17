@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  flutter: circleci/flutter@1.1.0
+  node: circleci/node@5.0.2
   macos: circleci/macos@2.3.4
 
 jobs: # a basic unit of work in a run
@@ -15,6 +15,7 @@ jobs: # a basic unit of work in a run
           command: xcodebuild test -scheme circleci-demo-macos
 
   build:
+    executor: node/default
     macos:
       xcode: 14.2.0 # indicate our selected version of Xcodez
     steps:
@@ -25,13 +26,12 @@ jobs: # a basic unit of work in a run
           device: "iPhone 14 Pro"
       - attach_workspace:
           at: .
-      - flutter/install_sdk_and_pub:
-          flutter_version: 3.7.0
-          app-dir: iostest
+      - node/install-packages:
+          pkg-manager: yarn
       - run:
           name: flutter build
           #command: flutter build ipa --export-method development
-          command: flutter run
+          command: npx react-native run-ios --configuration=release
           no_output_timeout: 1m30s
       #- run:
           # build our application
