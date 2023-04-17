@@ -15,9 +15,9 @@ jobs: # a basic unit of work in a run
           command: xcodebuild test -scheme circleci-demo-macos
 
   build:
-    executor: node/default
     macos:
       xcode: 14.2.0 # indicate our selected version of Xcodez
+    executor: node/default
     steps:
       - checkout
       - macos/preboot-simulator:
