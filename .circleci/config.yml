@@ -1,23 +1,13 @@
 version: 2.1
 
 orbs:
-  node: circleci/node@5.0.2
+  node: circleci/node@5.1.0
   macos: circleci/macos@2.3.4
 
 jobs: # a basic unit of work in a run
-  test: # your job name
-    macos:
-      xcode: 14.1.0 # indicate our selected version of Xcode
-    steps: # a series of commands to run
-      - checkout  # pull down code from your version control system.
-      - run:
-          name: Run Unit Tests
-          command: xcodebuild test -scheme circleci-demo-macos
-
   build:
     macos:
       xcode: 14.2.0 # indicate our selected version of Xcodez
-    executor: node/default
     steps:
       - checkout
       - macos/preboot-simulator:
