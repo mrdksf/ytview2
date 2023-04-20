@@ -16,12 +16,12 @@ jobs: # a basic unit of work in a run
       #    device: "iPhone 14 Pro"
       - attach_workspace:
           at: .
-      #- node/install-packages:
-      #    pkg-manager: yarn
+      - node/install-packages:
+          pkg-manager: yarn
       - run:
           name: flutter build
           #command: flutter build ipa --export-method development
-          command: xcodebuild -workspace ios/ytview.xcworkspace -scheme ytview -archivePath ios/Archive.xcarchive archive
+          command: npx react-native run-ios --mode=Release
           #no_output_timeout: 1m30s
       #- run:
           # build our application
