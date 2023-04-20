@@ -17,9 +17,8 @@ jobs: # a basic unit of work in a run
       #    device: "iPhone 14 Pro"
       - attach_workspace:
           at: .
-      #- node/install-packages:
-      #    pkg-manager: yarn
-      - rn/yarn_install
+      - node/install-packages:
+          pkg-manager: yarn
       - rn/ios_build:
           build_configuration: Release
           device: iPhone 14
