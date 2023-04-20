@@ -8,7 +8,7 @@ orbs:
 jobs: # a basic unit of work in a run
   build:
     macos:
-      xcode: 14.2.0 # indicate our selected version of Xcodez
+      xcode: 13.4.1 # indicate our selected version of Xcodez
     steps:
       - checkout
       #- macos/preboot-simulator:
@@ -20,9 +20,12 @@ jobs: # a basic unit of work in a run
       - node/install-packages:
           pkg-manager: yarn
       - rn/pod_install
+      #- run:
+          #name: pod install
+          #command: cd ios && pod install && cd -
       - rn/ios_build:
           build_configuration: Release
-          device: iPhone 14
+          device: iPhone 13
           #pod_install_directory: ios
           #name: build_ios_release
           project_path: ios/ytview.xcodeproj
