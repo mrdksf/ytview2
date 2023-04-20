@@ -10,10 +10,10 @@ jobs: # a basic unit of work in a run
       xcode: 14.2.0 # indicate our selected version of Xcodez
     steps:
       - checkout
-      - macos/preboot-simulator:
-          version: "16.2"
-          platform: "iOS"
-          device: "iPhone 14 Pro"
+      #- macos/preboot-simulator:
+      #    version: "16.2"
+      #    platform: "iOS"
+      #    device: "iPhone 14 Pro"
       - attach_workspace:
           at: .
       - node/install-packages:
@@ -21,8 +21,8 @@ jobs: # a basic unit of work in a run
       - run:
           name: flutter build
           #command: flutter build ipa --export-method development
-          command: npx react-native run-ios --configuration=release
-          no_output_timeout: 1m30s
+          command: npx expo build:ios
+          #no_output_timeout: 1m30s
       #- run:
           # build our application
           #name: Build Application
@@ -36,11 +36,12 @@ jobs: # a basic unit of work in a run
       - run:
           # compress Xcode's build output so that it can be stored as an artifact
           name: Compress app for storage
-          #command: zip -r app.zip ios/build
-          command: zip -r app.zip .
-          when: on_fail
+          #command: zip -r app.zip .
+          command: ls ios > a.txt
+          #when: on_fail
       - store_artifacts: # store this build output. Read more: https://circleci.com/docs/2.0/artifacts/
-          path: app.zip
+          #path: app.zip
+          path: a.txt
           destination: app
 
 workflows:
