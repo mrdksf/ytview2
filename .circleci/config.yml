@@ -3,7 +3,7 @@ version: 2.1
 orbs:
   node: circleci/node@5.1.0
   macos: circleci/macos@2.3.4
-  react-native: react-native-community/react-native@7.1.1
+  react-native: react-native-community/react-native@7.1.1 #ab
 
 jobs: # a basic unit of work in a run
   build:
