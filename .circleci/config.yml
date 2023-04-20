@@ -21,7 +21,7 @@ jobs: # a basic unit of work in a run
       - run:
           name: flutter build
           #command: flutter build ipa --export-method development
-          command: npx expo build:ios
+          command: npx expo-cli build:ios
           #no_output_timeout: 1m30s
       #- run:
           # build our application

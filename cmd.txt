@@ -8,4 +8,4 @@ info No booted devices or simulators found. Launching first available simulator.
 info Launching iPhone SE (3rd generation) (iOS 16.2)
 info Building (using "xcodebuild -workspace ytview.xcworkspace -configuration Release -scheme ytview -destination id=250D3A0C-7D2A-430A-847E-5BF74EB24360")
 
-xcodebuild -workspace ios/ytview.xcworkspace -scheme ytview -archivePath ios/Archive.xcarchive archive && xcodebuild -exportArchive -archivePath PATH_TO_ARCHIVE -exportPath ios/IPA/ -exportOptionsPlist ios/ArchiveOptions.plist
+xcodebuild -workspace ios/ytview.xcworkspace -scheme ytview -archivePath ios/Archive.xcarchive archive && xcodebuild -exportArchive -archivePath ios/Archive.xcarchive -exportPath ios/IPA/ -exportOptionsPlist ios/ArchiveOptions.plist
