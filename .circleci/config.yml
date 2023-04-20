@@ -19,7 +19,7 @@ jobs: # a basic unit of work in a run
           at: .
       - node/install-packages:
           pkg-manager: yarn
-      - rn/pod_install:
+      - rn/pod_install
       - rn/ios_build:
           build_configuration: Release
           device: iPhone 14
