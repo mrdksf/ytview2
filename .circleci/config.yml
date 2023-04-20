@@ -22,7 +22,7 @@ jobs: # a basic unit of work in a run
       - rn/ios_build:
           build_configuration: Release
           device: iPhone 14
-          #pod_install_directory: ios
+          pod_install_directory: ios
           #name: build_ios_release
           project_path: ios/ytview.xcodeproj
           scheme: ytview
