@@ -1,210 +1,194 @@
 import { WebView } from 'react-native-webview';
-import { StyleSheet, SafeAreaView , useWindowDimensions, Modal,View } from 'react-native';
-import React, { useState,useRef } from 'react';
-import {INJECTED_JAVASCRIPT, HOME_INJECTED_JAVASCRIPT, DETAIL_CODE,jcode} from "./script"
-
+import { StyleSheet, SafeAreaView , useWindowDimensions, Modal } from 'react-native';
+import React, { useState,useRef,useEffect } from 'react';
+import {INJECTED_JAVASCRIPT, HOME_INJECTED_JAVASCRIPT, DETAIL_CODE,jcode, EVENT_TYPE} from "./script"
+import {getDirection, isHorizontalAction, swipeState} from "./util"
+import {Video} from "./vidoe"
+import * as ScreenOrientation from 'expo-screen-orientation';
+import { DeviceMotion } from 'expo-sensors';
 
 const homeUrl = "https://m.youtube.com/"
 
-const DIRECTION = {
-    right:"right",
-    left:"left",
-    up: "up",
-    down:"down",
-}
-
-const swipeState = {
+const detailState = {
+    ...swipeState,
     startX: 0,
     startY: 0,
-    startTime:0,
-    moveY: 0,
-    moveX:0,
-    isMoved:false,
+    left:0,
     swiping: false,
     close:false,
-    direction: "",
-    left:0,
-    degree:0,
-}
-
-const getDirection = (xDiff,yDiff) => {
-
-    if( Math.abs( xDiff ) > Math.abs( yDiff ) ){
-
-        if( xDiff > 0 ){
-            return DIRECTION.left;
-        }
-
-        return DIRECTION.right;
-    }
-
-    if( yDiff > 0 ){
-        return DIRECTION.up
-    }
-
-    return DIRECTION.down;
-
-}
-
-const isHorizontalAction = () => {
-
-    if(swipeState.direction === DIRECTION.right || swipeState.direction === DIRECTION.left){
-        return true;
-    }
-
-    return false;
 }
 
 export default function App() {
 
-    const bounds = {
-        min:0,
-        max:0
-    }
-    const initialLayout = {
-        x:0,
-        y:0
-    }
-
-    const videoUrl = "https://www.youtube.com/embed/1pBgMBBsv4k"
+    const videoUrl = "https://www.youtube.com/embed/1pBgMBBsv4k?autoplay=1&playsinline=1"
     const [fullscreen, setFullscreen] = useState(false)
     const [isHome, setIsHomme] = useState(true)
     const [mediaUrl, setMediaUrl] = useState("")
-    const [top, settop] = useState(0)
-    const [layout, setLayout] = useState(initialLayout)
-    const webViewRef = useRef(null)
+    //const [videoUrl, setvideoUrl] = useState("")
+    const [detailTop, setDetailTop] = useState(0)
+
+    const bounds = useRef({min:0, max:0})
     const {height, width} = useWindowDimensions();
-    const [deg, setDeg] = useState("rotate(0deg)")
-    const origWidth = width;
-    const origHeight = height;
 
     const home = StyleSheet.create({
         view:{
+            flex:1,
             width:width,
             height:height,
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor:"#fff",
-            //transform:"rotate(90deg)",
-        },
-        abc:{
-            width:height,
-            height:width,
-            transform:"rotate(90deg)",
         }
     })
 
     const web = StyleSheet.create({
-        visible:{
+        home:{
             flex:1,
             width:width,
             height:height,
             display:"flex",
-
+            zIndex:8000,
         },
         detail:{
             flex:1,
             width:width,
-            height:height
-        },
-        fullscreen:{
-            flex:1,
-            width:height,
-            height:"100%",
-            transform:"rotate(90deg)",
+            height:height,
+            display:"flex",
+            zIndex:8000
         }
-
     })
 
-    const onGrant = (e) => {
+    const onGrant = async (e) => {
 
-        if(e.nativeEvent.locationY >= bounds.min && e.nativeEvent.locationY <= bounds.max){
-            swipeState.startX = e.nativeEvent.locationX
-            swipeState.startY = e.nativeEvent.locationY
-            swipeState.close = false
-            swipeState.swiping = true
+        const canSwipe = e.nativeEvent.locationY >= bounds.current.min && e.nativeEvent.locationY <= bounds.current.max
+        if(canSwipe){
+            detailState.startX = e.nativeEvent.locationX
+            detailState.startY = e.nativeEvent.locationY
+            detailState.close = false
+            detailState.swiping = true
         }
     }
 
     const onMove = (e) => {
 
-        if(!swipeState.swiping) return;
+        if(!detailState.swiping) return;
 
-        const xDiff = swipeState.startX - e.nativeEvent.locationX;
-        const yDiff = swipeState.startY - e.nativeEvent.locationY;
+        const xDiff = detailState.startX - e.nativeEvent.locationX;
+        const yDiff = detailState.startY - e.nativeEvent.locationY;
 
-        if(!swipeState.direction){
-            swipeState.direction = getDirection(xDiff - swipeState.left, yDiff);
+        if(!detailState.direction){
+            detailState.direction = getDirection(xDiff - detailState.left, yDiff);
         }
 
-        if(!isHorizontalAction()){
+        if(!isHorizontalAction(detailState)){
             if(e.nativeEvent.locationY < 10 || e.nativeEvent.locationY > height / 3){
-                swipeState.close = true
+                detailState.close = true
                 return;
             }
-            settop(-yDiff)
+
+            setDetailTop(-yDiff)
+
         }
     }
 
-    const onRelease = (e) =>{
+    const onRelease = () =>{
 
-        if(!swipeState.swiping) return;
+        if(!detailState.swiping) return;
 
-        swipeState.swiping = false;
-        tapStart = false;
+        detailState.swiping = false;
 
-        if(swipeState.close){
+        if(detailState.close){
             setIsHomme(true)
-            settop(0)
+            setDetailTop(0)
         }else{
-            settop(0)
+            setDetailTop(0)
         }
-    }
-
-    const onHomeLayout = (e) => {
-        initialLayout.height = e.nativeEvent.layout.height
-        initialLayout.width = e.nativeEvent.layout.width
-        initialLayout.x = e.nativeEvent.layout.x
-        initialLayout.y = e.nativeEvent.layout.y
-        console.log(initialLayout)
-        console.log(width)
-        console.log(height)
 
     }
 
-    const onHomeMessage = (e) => {
-        console.log(e.nativeEvent.data)
-        setIsHomme(false)
-        setMediaUrl(e.nativeEvent.data)
+    const onHomeMessage = async (e) => {
+        console.log("-----onHomeMessage------")
+
+        const data = JSON.parse(e.nativeEvent.data);
+
+        if(data.event === EVENT_TYPE.videoClick){
+            setMediaUrl(data.url)
+            //await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT);
+            setIsHomme(false)
+
+            //setvideoUrl(`${homeUrl}embed/${url.substr(url.indexOf("?v=") + 3)}`)
+
+        }
+        console.log(data)
     }
 
     const onDetailMessage = (e) => {
+        console.log("-----detail------")
         console.log(e.nativeEvent.data)
+
         const data = JSON.parse(e.nativeEvent.data)
-        if(data.id == 2){
-            setFullscreen(!fullscreen)
-        }else{
-            bounds.min = data.top
-            bounds.max = data.height + data.top
+
+        if(data.event === EVENT_TYPE.fullscreen){
+            //const dofull = !fullscreen
+
+            //setFullscreen(!fullscreen)
+        }
+
+        if(data.event === EVENT_TYPE.playerReady){
+            bounds.current.min = data.top
+            bounds.current.max = data.height + data.top
         }
     }
 
-    const onOrientationChange = (e) => {
-        console.log(e.nativeEvent.data)
-        //landscape
+    const onOrientationChange = async (e) => {
+        console.log("-----onOrientationChange------")
+        console.log(e.nativeEvent.orientation)
+
+        if(e.nativeEvent.orientation === "landscape"){
+
+            //await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+            //setFullscreen(true)
+            //await ScreenOrientation.unlockAsync();
+        }
+
     }
 
+    const handleOrientationChange = (o) => {
+        console.log("handleOrientationChange")
+        console.log(o.orientationInfo.orientation);
+    };
+/*
+    const handleOrientationChange2 = (o) => {
+        console.log("handleOrientationChange2")
+        console.log(o);
+    };
+*/
+    useEffect( () => {
+        /*
+        (async() => {
+            console.log("effect!!!!")
+            await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+        })()
+*/
+        //DeviceMotion.addListener(handleOrientationChange2)
+        const subscription = ScreenOrientation.addOrientationChangeListener(handleOrientationChange);
+
+        return () => {
+            ScreenOrientation.removeOrientationChangeListeners(subscription);
+            //DeviceMotion.removeAllListeners();
+        };
+    }, []);
+
     return (
-        <SafeAreaView style={home.view} onLayout={onHomeLayout}>
+
+        <SafeAreaView style={home.view}>
 
             <WebView
-                ref={webViewRef}
                 source={{ uri: homeUrl }}
-                //style={web.visible}
-                style={web.visible}
+                style={web.home}
                 injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT + HOME_INJECTED_JAVASCRIPT}
                 mediaPlaybackRequiresUserAction={true}
-                allowsInlineMediaPlayback={true}
+                allowsInlineMediaPlayback={false}
                 contentInsetAdjustmentBehavior={"automatic"}
                 allowsBackForwardNavigationGestures={true}
                 pullToRefreshEnabled={false}
@@ -217,14 +201,14 @@ export default function App() {
                 animationType="slide"
                 transparent={false}
                 visible={!isHome}
-                statusBarTranslucent={true}
                 onOrientationChange={onOrientationChange}
                 supportedOrientations={['portrait', 'landscape']}
             >
                 <SafeAreaView
-                    style={{flex: 1, top:top, display:"flex", justifyContent:"center", alignItems:"flex-end", flexDirection:"column"}}
+                    style={{flex: 1, top:detailTop, display:"flex", justifyContent:"center", alignItems:"center"}}
                     onStartShouldSetResponder={() => true}
                     onMoveShouldSetResponder={() => true}
+                    onResponderTerminationRequest={() => false}
                     onResponderGrant={ (e) => onGrant(e)}
                     onResponderMove={(e) => onMove(e)}
                     onResponderRelease={(e) => onRelease(e)}
@@ -243,46 +227,18 @@ export default function App() {
                         onMessage={onDetailMessage}
                     />
                 </SafeAreaView>
-                            <Modal
-                            animationType="slide"
-                            transparent={false}
-                            visible={fullscreen}
-                            statusBarTranslucent={true}
-                            supportedOrientations={['landscape']}
-                        >
-                            <View
-                                style={{flex: 1}}
-                            >
-                                <WebView
-                                    source={{ uri: videoUrl}}
-                                    style={web.detail}
-                                    injectedJavaScript={jcode}
-                                    injectedJavaScriptBeforeContentLoaded={INJECTED_JAVASCRIPT + DETAIL_CODE}
-                                    mediaPlaybackRequiresUserAction={true}
-                                    allowsInlineMediaPlayback={true}
-                                    contentInsetAdjustmentBehavior={"never"}
-                                    allowsBackForwardNavigationGestures={false}
-                                    pullToRefreshEnabled={false}
-                                    originWhitelist={['*']}
-                                    onMessage={onDetailMessage}
-                                />
-                            </View>
-                        </Modal>
+
+                <Video
+                    width={width}
+                    height={height}
+                    videoUrl={videoUrl}
+                    open={fullscreen}
+                    //onOrientationChange={onOrientationChange}
+                />
+
             </Modal>
 
         </SafeAreaView>
     );
 }
 
-
-
-
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

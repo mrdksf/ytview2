@@ -4,8 +4,7 @@ export const EVENT_TYPE = {
     playerReady:2,
 }
 
-export const INJECTED_JAVASCRIPT = `(function() {
-
+(function() {
     Object.defineProperties(window, {
 
         _ytInitialPlayerResponse: {
@@ -73,9 +72,33 @@ export const INJECTED_JAVASCRIPT = `(function() {
         },
     });
 
-})();`;
+    HTMLElement.prototype.webkitRequestFullscreen = new Proxy(HTMLElement.prototype.webkitRequestFullscreen, {
+        apply: function() {
+            const data = {event:0}
+            window.ReactNativeWebView.postMessage(JSON.stringify(data))
+            return;
+        },
+    });
 
-export const HOME_INJECTED_JAVASCRIPT = `(function() {
+    HTMLElement.prototype.requestFullscreen = new Proxy(HTMLElement.prototype.requestFullscreen, {
+        apply: function() {
+            const data = {event:0}
+            window.ReactNativeWebView.postMessage(JSON.stringify(data))
+            return;
+        },
+    });
+
+    HTMLElement.prototype.webkitEnterFullscreen = new Proxy(HTMLElement.prototype.webkitEnterFullscreen, {
+        apply: function() {
+            const data = {event:0}
+            window.ReactNativeWebView.postMessage(JSON.stringify(data))
+            return;
+        },
+    });
+
+})();
+
+(function() {
     window.addEventListener("click", e => {
 
         const path = e.composedPath();
@@ -91,76 +114,54 @@ export const HOME_INJECTED_JAVASCRIPT = `(function() {
             e.stopPropagation();
             const anchors = path.filter(node => node.tagName === "A")
             if(anchors.length > 0){
-                const data = {event:${EVENT_TYPE.videoClick}, url:anchors[0].href}
+                const data = {event:EVENT_TYPE.videoClick, url:anchors[0].href}
                 window.ReactNativeWebView.postMessage(JSON.stringify(data))
             }
         }
     })
 
-})();`;
+})();
 
+(function() {
 
-
-
-export const DETAIL_CODE = `(function() {
-
-    let isFullscreen = false;
-
-    Object.defineProperties(document, {
-        webkitFullscreenEnabled:{
-            get: function(){
-                return true;
-            }
-        }
-    })
-
-    const event = new Event("webkitfullscreenchange")
-
-    const fireChange = () => {
-        document.dispatchEvent(event)
-    }
-
-    document.addEventListener("webkitfullscreenchange", e => {
-        const data = {event:800, d:Object.keys(HTMLDivElement.prototype)}
-        window.ReactNativeWebView.postMessage(JSON.stringify(data))
-    })
-
-    HTMLDivElement.prototype.webkitEnterFullscreen = function(e){
-        var me = this;
-        const data = {event:801, e:me}
-        window.ReactNativeWebView.postMessage(JSON.stringify(data))
-    }
-
-    HTMLDivElement.prototype.webkitExitFullscreen = function(){
-        const data = {event:802}
-        window.ReactNativeWebView.postMessage(JSON.stringify(data))
-    }
-
-    HTMLVideoElement.prototype.webkitEnterFullscreen = new Proxy(HTMLVideoElement.prototype.webkitEnterFullscreen, {
+    HTMLElement.prototype.webkitRequestFullscreen = new Proxy(HTMLElement.prototype.webkitRequestFullscreen, {
         apply: function() {
             const data = {event:0}
-            isFullscreen = !isFullscreen
-            fireChange()
             window.ReactNativeWebView.postMessage(JSON.stringify(data))
             return;
         },
     });
 
-})();`;
+    HTMLElement.prototype.requestFullscreen = new Proxy(HTMLElement.prototype.requestFullscreen, {
+        apply: function() {
+            const data = {event:0}
+            window.ReactNativeWebView.postMessage(JSON.stringify(data))
+            return;
+        },
+    });
 
+    HTMLElement.prototype.webkitEnterFullscreen = new Proxy(HTMLElement.prototype.webkitEnterFullscreen, {
+        apply: function() {
+            const data = {event:0}
+            window.ReactNativeWebView.postMessage(JSON.stringify(data))
+            return;
+        },
+    });
 
-export const jcode = `(function() {
+})();
+
+(function() {
 
     const target = document.querySelectorAll(".player-container")
 
     if(target.length){
         const rect = target[0]//.getBoundingClientRect()
         const data = {
-            event:${EVENT_TYPE.playerReady},
+            event:0,
             height:rect.offsetHeight,
             top:rect.offsetTop
         }
         window.ReactNativeWebView.postMessage(JSON.stringify(data))
     }
-})();`;
+})();
 
